@@ -28,12 +28,30 @@ func (e *elve) takePackage(call string) (packagesComplete bool, err error) {
 	}
 }
 
-func (e elve) lineUp(other *elve) (bigger *elve, smaller *elve) {
+func (e elve) lineUp(other *elve) (bigger elve, smaller *elve) {
 	if e.calories > other.calories {
-		return &e, other
+		return e, other
 	} else {
-		return other, &e
+		return *other, &e
 	}
+}
+
+type topElves struct {
+	highScores [3]elve
+}
+
+func (t *topElves) lineUp(current *elve) {
+	for i, next := range t.highScores {
+		t.highScores[i], current = next.lineUp(current)
+	}
+}
+
+func (t *topElves) sumUp() (all int) {
+
+	for _, score := range t.highScores {
+		all += score.calories
+	}
+	return all
 }
 
 func main() {
@@ -51,7 +69,7 @@ func main() {
 
 	s := bufio.NewScanner(f)
 	s.Split(bufio.ScanLines)
-	richElve := newElve()
+	topElves := topElves{highScores: [3]elve{*newElve(), *newElve(), *newElve()}}
 	currentElve := newElve()
 	for s.Scan() {
 		packageComplete, err := currentElve.takePackage(s.Text())
@@ -59,10 +77,13 @@ func main() {
 			panic(err)
 		}
 		if packageComplete {
-			richElve, _ = richElve.lineUp(currentElve)
+			topElves.lineUp(currentElve)
 			currentElve = newElve()
 		}
 	}
-	log.Printf("%v", richElve.calories)
+	log.Printf("First:\t%v", topElves.highScores[0].calories)
+	log.Printf("Second:\t%v", topElves.highScores[1].calories)
+	log.Printf("Third:\t%v", topElves.highScores[2].calories)
+	log.Printf("sum:\t%v", topElves.sumUp())
 
 }
