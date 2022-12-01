@@ -28,11 +28,11 @@ func (e *elve) takePackage(call string) (packagesComplete bool, err error) {
 	}
 }
 
-func (e elve) returnRicher(other *elve) *elve {
+func (e elve) lineUp(other *elve) (bigger *elve, smaller *elve) {
 	if e.calories > other.calories {
-		return &e
+		return &e, other
 	} else {
-		return other
+		return other, &e
 	}
 }
 
@@ -59,7 +59,7 @@ func main() {
 			panic(err)
 		}
 		if packageComplete {
-			richElve = richElve.returnRicher(currentElve)
+			richElve, _ = richElve.lineUp(currentElve)
 			currentElve = newElve()
 		}
 	}
