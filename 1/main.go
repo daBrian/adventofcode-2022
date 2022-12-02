@@ -55,7 +55,7 @@ func (t *topElves) sumUp() (all int) {
 
 func main() {
 
-	s, err := internal.NewLineScanner("./1/input.txt")
+	s, err := internal.LineScannerFromFile("./1/input.txt")
 	defer s.Close()
 	if err != nil {
 		log.Panic(err)
