@@ -1,9 +1,8 @@
 package main
 
 import (
-	"bufio"
+	"github.com/daBrian/adventofcode-2022/internal"
 	"log"
-	"os"
 	"strconv"
 )
 
@@ -56,19 +55,12 @@ func (t *topElves) sumUp() (all int) {
 
 func main() {
 
-	f, err := os.Open("./1/input.txt")
-	defer func(f *os.File) {
-		err := f.Close()
-		if err != nil {
-			log.Panic(err)
-		}
-	}(f)
+	s, err := internal.NewLineScanner("./1/input.txt")
+	defer s.Close()
 	if err != nil {
 		log.Panic(err)
 	}
 
-	s := bufio.NewScanner(f)
-	s.Split(bufio.ScanLines)
 	topElves := topElves{highScores: [3]elve{*newElve(), *newElve(), *newElve()}}
 	currentElve := newElve()
 	for s.Scan() {
@@ -81,9 +73,10 @@ func main() {
 			currentElve = newElve()
 		}
 	}
+
 	log.Printf("First:\t%v", topElves.highScores[0].calories)
 	log.Printf("Second:\t%v", topElves.highScores[1].calories)
 	log.Printf("Third:\t%v", topElves.highScores[2].calories)
-	log.Printf("sum:\t%v", topElves.sumUp())
+	log.Printf("Sum:\t%v", topElves.sumUp())
 
 }
