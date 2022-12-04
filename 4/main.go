@@ -10,6 +10,7 @@ import (
 
 func main() {
 	run4a()
+	run4b()
 }
 
 func run4a() {
@@ -25,6 +26,19 @@ func run4a() {
 	log.Printf("3a Total scores: %v", result)
 
 }
+func run4b() {
+	s, err := internal.LineScannerFromFile("./4/input.txt")
+	defer s.Close()
+	if err != nil {
+		log.Panic(err)
+	}
+	result, err := countOverlappingPairs(s)
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("3b Total scores: %v", result)
+
+}
 
 type elve struct {
 	start int
@@ -33,6 +47,10 @@ type elve struct {
 
 func (e elve) covers(other *elve) bool {
 	return e.start <= other.start && e.end >= other.end
+}
+
+func (e elve) endOverlaps(second *elve) bool {
+	return e.end >= second.start && e.start <= second.start
 }
 
 func newElve(s string) (*elve, error) {
@@ -59,6 +77,19 @@ func countEnclosingPairs(s *internal.LineScanner) (int, error) {
 			return 0, err
 		}
 		if first.covers(second) || second.covers(first) {
+			count++
+		}
+	}
+	return count, nil
+}
+func countOverlappingPairs(s *internal.LineScanner) (int, error) {
+	var count int
+	for s.Scan() {
+		first, second, err := getPairs(s.Text())
+		if err != nil {
+			return 0, err
+		}
+		if first.endOverlaps(second) || second.endOverlaps(first) {
 			count++
 		}
 	}

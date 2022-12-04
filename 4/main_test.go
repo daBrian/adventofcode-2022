@@ -17,3 +17,14 @@ func Test_countEnclosingPairs(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 2, got)
 }
+func Test_countOverlappingPairs(t *testing.T) {
+	ls, _ := internal.LineScannerFromString(`2-4,6-8
+2-3,4-5
+5-7,7-9
+2-8,3-7
+6-6,4-6
+2-6,4-8`)
+	got, err := countOverlappingPairs(ls)
+	assert.NoError(t, err)
+	assert.Equal(t, 4, got)
+}
