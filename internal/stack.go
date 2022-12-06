@@ -26,6 +26,19 @@ func (s *Stack[C]) Pop() (C, bool) {
 	}
 }
 
+// Remove and return top element of Stack. Return false if Stack is empty.
+func (s *Stack[C]) PopMore(n int) (rv []C, more bool) {
+	var top C
+	for i := 0; i < n; i++ {
+		top, more = s.Pop()
+		rv = append([]C{top}, rv...)
+		if !more {
+			break
+		}
+	}
+	return
+}
+
 func (s *Stack[C]) Peek() (C, bool) {
 	if s.IsEmpty() {
 		var noop C
@@ -34,5 +47,11 @@ func (s *Stack[C]) Peek() (C, bool) {
 		index := len(s.content) - 1 // Get the index of the top most element.
 		element := (s.content)[index]
 		return element, true
+	}
+}
+
+func (s *Stack[C]) PushMore(l []C) {
+	for _, c := range l {
+		s.Push(c)
 	}
 }

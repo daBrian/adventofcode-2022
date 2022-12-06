@@ -11,21 +11,23 @@ import (
 
 func main() {
 
-	run5a()
+	run5(false)
+	run5(true)
+
 }
 
-func run5a() {
+func run5(multipleStacks bool) {
 	s, err := LineScannerFromFile("./5/input.txt")
 	defer s.Close()
 	if err != nil {
 		log.Panic(err)
 	}
-	stacks, err := buildAndRearrangeStacks(s)
+	stacks, err := buildAndRearrangeStacks(s, multipleStacks)
 	if err != nil {
 		panic(err)
 	}
 
-	log.Printf("5a Top line: %v", peeksStacks(stacks))
+	log.Printf("5, multiple:%v Top line: %v", multipleStacks, peeksStacks(stacks))
 
 }
 
@@ -41,18 +43,18 @@ func peeksStacks(stacks []Stack[crane]) string {
 	return b.String()
 }
 
-func buildAndRearrangeStacks(s *LineScanner) (stacks []Stack[crane], err error) {
+func buildAndRearrangeStacks(s *LineScanner, multipleStacks bool) (stacks []Stack[crane], err error) {
 	stacks, err = parseStacks(s)
 	if err != nil {
 		return nil, err
 	}
-	err = reArrangeStacks(stacks, s)
+	err = reArrangeStacks(stacks, s, multipleStacks)
 	return
 }
 
-func reArrangeStacks(stacks []Stack[crane], s *LineScanner) error {
+func reArrangeStacks(stacks []Stack[crane], s *LineScanner, multipleStacks bool) error {
 	for s.Scan() {
-		err := move(s.Text(), stacks, s.LineNumber())
+		err := move(s.Text(), stacks, s.LineNumber(), multipleStacks)
 		if err != nil {
 			return err
 		}
@@ -60,7 +62,7 @@ func reArrangeStacks(stacks []Stack[crane], s *LineScanner) error {
 	return nil
 }
 
-func move(order string, stacks []Stack[crane], lineNumber int) error {
+func move(order string, stacks []Stack[crane], lineNumber int, multipleStacks bool) error {
 	actions := strings.Fields(order)
 	n, err := strconv.Atoi(actions[1])
 	if err != nil {
@@ -74,12 +76,20 @@ func move(order string, stacks []Stack[crane], lineNumber int) error {
 	if err != nil {
 		return fmt.Errorf("Could not parse 'to' number from line '%v'", order)
 	}
-	for i := 0; i < n; i++ {
-		c, remaining := stacks[from-1].Pop()
+	if multipleStacks {
+		c, remaining := stacks[from-1].PopMore(n)
 		if !remaining {
 			return fmt.Errorf("Stack %v is empty in line %v", from, lineNumber)
 		}
-		stacks[to-1].Push(c)
+		stacks[to-1].PushMore(c)
+	} else {
+		for i := 0; i < n; i++ {
+			c, remaining := stacks[from-1].Pop()
+			if !remaining {
+				return fmt.Errorf("Stack %v is empty in line %v", from, lineNumber)
+			}
+			stacks[to-1].Push(c)
+		}
 	}
 	return nil
 }
