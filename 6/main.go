@@ -8,6 +8,12 @@ import (
 )
 
 func main() {
+	r6(4)
+	r6(14)
+
+}
+
+func r6(nOfCharacters int) {
 	s, err := LineScannerFromFile("./6/input.txt")
 	defer s.Close()
 	if err != nil {
@@ -17,19 +23,17 @@ func main() {
 		log.Panic(errors.New("File seems to be empty"))
 	}
 
-	pos, err := findPackagePosition(s.Text())
+	pos, err := findPackagePosition(s.Text(), nOfCharacters)
 	if err != nil {
 		panic(err)
 	}
-
-	log.Printf("6 - first marker after character %v", pos)
-
+	log.Printf("6a - first %v-marker after character %v", nOfCharacters, pos)
 }
 
-func findPackagePosition(datastream string) (int, error) {
+func findPackagePosition(datastream string, nOfCharacters int) (int, error) {
 	for i := range datastream {
-		if isBeforeMarker(datastream[i : i+4]) {
-			return i + 4, nil
+		if isBeforeMarker(datastream[i : i+nOfCharacters]) {
+			return i + nOfCharacters, nil
 		}
 	}
 	return 0, errors.New("no marker found")
