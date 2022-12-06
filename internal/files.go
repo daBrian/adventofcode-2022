@@ -10,6 +10,7 @@ import (
 type LineScanner struct {
 	s *bufio.Scanner
 	f io.ReadCloser
+	i int
 }
 
 func (ls LineScanner) Close() {
@@ -19,11 +20,16 @@ func (ls LineScanner) Close() {
 	}
 }
 func (ls LineScanner) Scan() bool {
+	ls.i++
 	return ls.s.Scan()
 }
 
 func (ls LineScanner) Text() string {
 	return ls.s.Text()
+}
+
+func (ls LineScanner) LineNumber() int {
+	return ls.i
 }
 
 func LineScannerFromFile(fileLocation string) (*LineScanner, error) {
