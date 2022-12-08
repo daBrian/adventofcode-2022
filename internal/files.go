@@ -10,6 +10,7 @@ import (
 type LineScanner struct {
 	s *bufio.Scanner
 	f io.ReadCloser
+	b Stack[string]
 	i int
 }
 
@@ -21,11 +22,27 @@ func (ls LineScanner) Close() {
 }
 func (ls LineScanner) Scan() bool {
 	ls.i++
-	return ls.s.Scan()
+	if !ls.b.IsEmpty() {
+		return true
+	} else {
+		return ls.s.Scan()
+	}
 }
 
 func (ls LineScanner) Text() string {
+	if !ls.b.IsEmpty() {
+		t, _ := ls.b.Pop()
+		return t
+	}
 	return ls.s.Text()
+}
+func (ls LineScanner) Push(line string) {
+	ls.b.Push(line)
+	ls.i--
+}
+
+func (ls *LineScanner) PushMore(l []string) {
+	ls.b.PushMore(l)
 }
 
 func (ls LineScanner) LineNumber() int {
