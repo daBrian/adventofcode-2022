@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/daBrian/adventofcode-2022/internal"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -29,7 +30,6 @@ $ ls
 8033020 d.log
 5626152 d.ext
 7214296 k`
-var _ = exampleInput
 var examplePrint = `- / (dir)
   - a (dir)
     - e (dir)
@@ -65,4 +65,16 @@ func Test_parseCommands(t *testing.T) {
 			assert.Equal(t, test.print, got.DeepString())
 		})
 	}
+}
+func TestSizes(t *testing.T) {
+	ls, _ := internal.LineScannerFromString(exampleInput)
+	root, err := parseCommands(ls)
+	assert.NoError(t, err)
+	dirs, _ := root.collectDirsWithSizes()
+	for _, dir := range dirs {
+		fmt.Printf("%v: %v\n", dir.dir.Path(), dir.totalSize)
+	}
+	smallerDirs := dirsWithAtMost(dirs, 100000)
+	fmt.Printf("7a - summarized size of small dirs is %v\n", sumUpSizes(smallerDirs))
+
 }

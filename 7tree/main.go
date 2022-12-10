@@ -120,11 +120,9 @@ func (d *DirNode) parseNext(s *LineScanner) (err error) {
 					s.LineNumber(), child.GetName(), d.GetName())
 			}
 			d.Children[child.GetName()] = child
-			fmt.Println(child.Path())
 		case dirPattern.MatchString(line):
 			child, err = NewDirNode(d, line)
 			d.Children[child.GetName()] = child
-			fmt.Println(child.Path())
 		case lsPattern.MatchString(line):
 			continue
 		case cdPattern.MatchString(line):
@@ -155,6 +153,29 @@ func (d DirNode) Cd(dir string) (*DirNode, error) {
 	return dirNode, nil
 }
 
+type DirWithTotalSize struct {
+	dir       DirNode
+	totalSize int
+}
+
+func (d DirNode) collectDirsWithSizes() (allDirs []DirWithTotalSize, nodeSize int) {
+	nodeSize = 0
+	for _, element := range d.Children {
+		switch element.(type) {
+		case *FileNode:
+			nodeSize = nodeSize + element.(*FileNode).Size
+		case *DirNode:
+			childDirs, childSize := element.(*DirNode).collectDirsWithSizes()
+			nodeSize = nodeSize + childSize
+			allDirs = append(allDirs, childDirs...)
+		default:
+			panic("collectDirsWithSizes unknown type")
+		}
+	}
+	allDirs = append(allDirs, DirWithTotalSize{d, nodeSize})
+	return
+}
+
 func main() {
 	r7a()
 }
@@ -165,10 +186,33 @@ func r7a() {
 	if err != nil {
 		log.Panic(err)
 	}
-	_, err = parseCommands(s)
+	root, err := parseCommands(s)
+
+	dirs, _ := root.collectDirsWithSizes()
+
+	smallerDirs := dirsWithAtMost(dirs, 100000)
+	fmt.Printf("7a - summarized size of small dirs is %v\n", sumUpSizes(smallerDirs))
 	if err != nil {
 		panic(err)
 	}
+}
+
+func sumUpSizes(dirs []DirWithTotalSize) (result int) {
+	for _, dir := range dirs {
+		result = result + dir.totalSize
+	}
+	return
+}
+
+func dirsWithAtMost(dirs []DirWithTotalSize, maximumSize int) (smallDirs []DirWithTotalSize) {
+	for _, dir := range dirs {
+		if dir.totalSize < maximumSize {
+			smallDirs = append(smallDirs, dir)
+		} else if dir.totalSize == maximumSize {
+			panic("found exact size!")
+		}
+	}
+	return
 }
 
 func parseCommands(s *LineScanner) (*DirNode, error) {
