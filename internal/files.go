@@ -14,13 +14,13 @@ type LineScanner struct {
 	i int
 }
 
-func (ls LineScanner) Close() {
+func (ls *LineScanner) Close() {
 	err := ls.f.Close()
 	if err != nil {
 		panic(err)
 	}
 }
-func (ls LineScanner) Scan() bool {
+func (ls *LineScanner) Scan() bool {
 	ls.i++
 	if !ls.b.IsEmpty() {
 		return true
@@ -29,14 +29,14 @@ func (ls LineScanner) Scan() bool {
 	}
 }
 
-func (ls LineScanner) Text() string {
+func (ls *LineScanner) Text() string {
 	if !ls.b.IsEmpty() {
 		t, _ := ls.b.Pop()
 		return t
 	}
 	return ls.s.Text()
 }
-func (ls LineScanner) Push(line string) {
+func (ls *LineScanner) Push(line string) {
 	ls.b.Push(line)
 	ls.i--
 }
@@ -45,7 +45,7 @@ func (ls *LineScanner) PushMore(l []string) {
 	ls.b.PushMore(l)
 }
 
-func (ls LineScanner) LineNumber() int {
+func (ls *LineScanner) LineNumber() int {
 	return ls.i
 }
 
