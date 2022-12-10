@@ -6,6 +6,7 @@ import (
 	. "github.com/daBrian/adventofcode-2022/internal"
 	"log"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -178,6 +179,8 @@ func (d DirNode) collectDirsWithSizes() (allDirs []DirWithTotalSize, nodeSize in
 
 func main() {
 	r7a()
+	r7b()
+
 }
 
 func r7a() {
@@ -194,6 +197,28 @@ func r7a() {
 	fmt.Printf("7a - summarized size of small dirs is %v\n", sumUpSizes(smallerDirs))
 	if err != nil {
 		panic(err)
+	}
+}
+func r7b() {
+	s, err := LineScannerFromFile("./7tree/input.txt")
+	defer s.Close()
+	if err != nil {
+		log.Panic(err)
+	}
+	root, err := parseCommands(s)
+
+	dirs, usedSize := root.collectDirsWithSizes()
+	sort.SliceStable(dirs, func(i, j int) bool {
+		return dirs[i].totalSize < dirs[j].totalSize
+	})
+	availableSize := 70000000 - usedSize
+	missingDelta := 30000000 - availableSize
+	fmt.Printf("70000000 - %v = %v\n Missing %v\n", usedSize, availableSize, missingDelta)
+	for _, dir := range dirs {
+		if dir.totalSize > missingDelta {
+			fmt.Printf("%v - %v\n", dir.totalSize, dir.dir.Path())
+			break
+		}
 	}
 }
 
