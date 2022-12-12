@@ -7,7 +7,7 @@ import (
 )
 
 func Test_buildAndRearrangeStacks(t *testing.T) {
-	ls, _ := internal.LineScannerFromString(`    [D]    
+	ls := internal.LineScannerFromString(`    [D]    
 [N] [C]    
 [Z] [M] [P]
  1   2   3 
@@ -22,7 +22,7 @@ move 1 from 1 to 2`)
 	assert.Equal(t, "CMZ", got)
 }
 func Test_buildAndRearrangeStacks9001(t *testing.T) {
-	ls, _ := internal.LineScannerFromString(`    [D]    
+	ls := internal.LineScannerFromString(`    [D]    
 [N] [C]    
 [Z] [M] [P]
  1   2   3 

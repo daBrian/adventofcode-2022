@@ -7,7 +7,7 @@ import (
 )
 
 func Test_countEnclosingPairs(t *testing.T) {
-	ls, _ := internal.LineScannerFromString(`2-4,6-8
+	ls := internal.LineScannerFromString(`2-4,6-8
 2-3,4-5
 5-7,7-9
 2-8,3-7
@@ -18,7 +18,7 @@ func Test_countEnclosingPairs(t *testing.T) {
 	assert.Equal(t, 2, got)
 }
 func Test_countOverlappingPairs(t *testing.T) {
-	ls, _ := internal.LineScannerFromString(`2-4,6-8
+	ls := internal.LineScannerFromString(`2-4,6-8
 2-3,4-5
 5-7,7-9
 2-8,3-7

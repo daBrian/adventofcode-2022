@@ -59,7 +59,7 @@ func Test_parseCommands(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ls, _ := internal.LineScannerFromString(test.input)
+			ls := internal.LineScannerFromString(test.input)
 			got, err := parseCommands(ls)
 			assert.NoError(t, err)
 			assert.Equal(t, test.print, got.DeepString())
@@ -67,7 +67,7 @@ func Test_parseCommands(t *testing.T) {
 	}
 }
 func TestSizes(t *testing.T) {
-	ls, _ := internal.LineScannerFromString(exampleInput)
+	ls := internal.LineScannerFromString(exampleInput)
 	root, err := parseCommands(ls)
 	assert.NoError(t, err)
 	dirs, _ := root.collectDirsWithSizes()

@@ -63,7 +63,11 @@ func createScanner(f io.ReadCloser) (*LineScanner, error) {
 	return &LineScanner{s: s, f: f}, nil
 }
 
-func LineScannerFromString(input string) (*LineScanner, error) {
+func LineScannerFromString(input string) *LineScanner {
 	reader := io.NopCloser(strings.NewReader(input))
-	return createScanner(reader)
+	scanner, err := createScanner(reader)
+	if err != nil {
+		panic(err)
+	}
+	return scanner
 }

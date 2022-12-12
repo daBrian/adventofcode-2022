@@ -8,7 +8,7 @@ import (
 )
 
 func Test_calculateScore(t *testing.T) {
-	ls, _ := internal.LineScannerFromString(
+	ls := internal.LineScannerFromString(
 		`vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg
@@ -62,7 +62,7 @@ func Test_calculateGroupScore(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ls, _ := internal.LineScannerFromString(test.input)
+			ls := internal.LineScannerFromString(test.input)
 			score, err := calculateGroupScore(ls, true)
 			assert.NoError(t, err)
 			assert.Equal(t, test.expect, score)
