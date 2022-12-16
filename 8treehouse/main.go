@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	r7a()
+	r8a()
+	r8b()
 }
 
 type tree struct {
@@ -20,7 +21,58 @@ func (t tree) String() string {
 	return fmt.Sprintf("%v/%v: %v", t.posx, t.posy, t.height)
 }
 
-func r7a() {
+func (t *tree) calcuclateScore(wood *[][]tree) int {
+	upTrees := t.countUp(*wood, t.height)
+	leftTrees := t.countLeft(*wood, t.height)
+	rightTrees := t.countRight(*wood, t.height)
+	downTrees := t.countDown(*wood, t.height)
+	return upTrees * leftTrees * rightTrees * downTrees
+}
+
+func (t *tree) countUp(wood [][]tree, maxHeight int) int {
+	if t.posy == 0 {
+		return 0
+	}
+	next := wood[t.posy-1][t.posx]
+	if next.height >= maxHeight {
+		return 1
+	}
+	return 1 + next.countUp(wood, maxHeight)
+}
+
+func (t *tree) countLeft(wood [][]tree, maxHeight int) int {
+	if t.posx == 0 {
+		return 0
+	}
+	next := wood[t.posy][t.posx-1]
+	if next.height >= maxHeight {
+		return 1
+	}
+	return 1 + next.countLeft(wood, maxHeight)
+}
+
+func (t *tree) countRight(wood [][]tree, maxHeight int) int {
+	if t.posx == len(wood[0])-1 {
+		return 0
+	}
+	next := wood[t.posy][t.posx+1]
+	if next.height >= maxHeight {
+		return 1
+	}
+	return 1 + next.countRight(wood, maxHeight)
+}
+func (t *tree) countDown(wood [][]tree, maxHeight int) int {
+	if t.posy == len(wood)-1 {
+		return 0
+	}
+	next := wood[t.posy+1][t.posx]
+	if next.height >= maxHeight {
+		return 1
+	}
+	return 1 + next.countDown(wood, maxHeight)
+}
+
+func r8a() {
 	s, err := LineScannerFromFile("./8treehouse/input.txt")
 	defer s.Close()
 	if err != nil {
@@ -28,7 +80,33 @@ func r7a() {
 	}
 	wood, err := loadWood(s)
 	visibleTrees := findVisibleTrees(wood)
-	fmt.Printf("Found %v trees", len(visibleTrees))
+	fmt.Printf("Found %v trees\n", len(visibleTrees))
+}
+
+func r8b() {
+	s, err := LineScannerFromFile("./8treehouse/input.txt")
+	defer s.Close()
+	if err != nil {
+		log.Panic(err)
+	}
+	wood, err := loadWood(s)
+	bestTree := findBestScenicScore(wood)
+	fmt.Printf("Best scenic score for %v: %v", bestTree, bestTree.calcuclateScore(&wood))
+}
+
+func findBestScenicScore(wood [][]tree) tree {
+	var bestTree tree
+	currentHighscore := 0
+	for _, trees := range wood {
+		for _, t := range trees {
+			newScore := t.calcuclateScore(&wood)
+			if newScore > currentHighscore {
+				bestTree = t
+				currentHighscore = newScore
+			}
+		}
+	}
+	return bestTree
 }
 
 func findVisibleTrees(wood [][]tree) map[tree]any {
