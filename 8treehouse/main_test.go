@@ -19,3 +19,13 @@ func TestWoodLoading(t *testing.T) {
 	assert.Equal(t, 5, len(woods))
 	assert.Equal(t, 5, len(woods[0]))
 }
+
+func TestFindHiddenTrees(t *testing.T) {
+	woods, _ := loadWood(exampleScanner)
+	found := findVisibleTrees(woods)
+	//for t2, _ := range found {
+	//	fmt.Println(t2)
+	//}
+	assert.NotNil(t, found)
+	assert.Equal(t, 21, len(found))
+}
