@@ -19,16 +19,28 @@ type knot struct {
 
 type tailKnot knot
 
-func (t tailKnot) follow(h headKnot) {
-	if h.x > t.x {
-		t.x++
-	} else if h.x < t.x {
-		t.x--
+func (t tailKnot) hasTraction(h headKnot) bool {
+	if h.x < t.x-1 || h.x > t.x+1 {
+		return true
 	}
-	if h.y > t.y {
-		t.y++
-	} else if h.y < t.y {
-		t.y--
+	if h.y < t.y-1 || h.y > t.y+1 {
+		return true
+	}
+	return false
+}
+
+func (t *tailKnot) follow(h *headKnot) {
+	if t.hasTraction(*h) {
+		if h.x > t.x {
+			t.x++
+		} else if h.x < t.x {
+			t.x--
+		}
+		if h.y > t.y {
+			t.y++
+		} else if h.y < t.y {
+			t.y--
+		}
 	}
 }
 
@@ -37,7 +49,7 @@ type headKnot struct {
 	traction
 }
 
-func (k headKnot) move() {
+func (k *headKnot) move() {
 	if k.xt > 0 {
 		k.x++
 		k.xt--
@@ -76,6 +88,9 @@ func (t traction) sumUp() int {
 }
 
 func loadTractionFromCall(call string) (traction, error) {
+	if len(call) == 0 {
+		return traction{}, nil
+	}
 	cols := strings.Fields(call)
 	steps, err := strconv.Atoi(cols[1])
 	if err != nil {
@@ -107,6 +122,7 @@ func r9a() {
 	if err != nil {
 		panic(err)
 	}
+	println(len(positions))
 }
 
 func scanAndMoveAll(s *LineScanner, head headKnot, tail tailKnot, positions map[tailKnot]bool) (err error) {
@@ -115,15 +131,18 @@ func scanAndMoveAll(s *LineScanner, head headKnot, tail tailKnot, positions map[
 		if err != nil {
 			return err
 		}
-		moveAll(head, tail, positions)
+		moveAll(&head, &tail, positions)
+	}
+	for tail.hasTraction(head) {
+		moveAll(&head, &tail, positions)
 	}
 	return nil
 }
 
-func moveAll(head headKnot, tail tailKnot, positions map[tailKnot]bool) {
+func moveAll(head *headKnot, tail *tailKnot, positions map[tailKnot]bool) {
 	head.move()
 	tail.follow(head)
-	positions[tail] = true
+	positions[*tail] = true
 	if head.hasTraction() {
 		moveAll(head, tail, positions)
 	}
