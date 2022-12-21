@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	. "github.com/daBrian/adventofcode-2022/internal"
 	"log"
 	"strconv"
@@ -17,9 +18,11 @@ type knot struct {
 	x, y int
 }
 
-type tailKnot knot
+type tailKnot struct {
+	knot
+}
 
-func (t tailKnot) hasTraction(h headKnot) bool {
+func (t tailKnot) hasTraction(h knot) bool {
 	if h.x < t.x-1 || h.x > t.x+1 {
 		return true
 	}
@@ -29,7 +32,7 @@ func (t tailKnot) hasTraction(h headKnot) bool {
 	return false
 }
 
-func (t *tailKnot) follow(h *headKnot) {
+func (t *tailKnot) follow(h *knot) {
 	if t.hasTraction(*h) {
 		if h.x > t.x {
 			t.x++
@@ -117,39 +120,12 @@ func r9a() {
 	}
 	positions := make(map[tailKnot]bool)
 	head := headKnot{}
-	tail := tailKnot{0, 0}
-	err = scanAndMoveAll(s, head, tail, positions)
+	tail := tailKnot{knot{0, 0}}
+	err = scanAndMoveAll(s, head, []tailKnot{tail}, positions, false)
 	if err != nil {
 		panic(err)
 	}
 	println(len(positions))
-}
-
-func scanAndMoveAll(s *LineScanner, head headKnot, tail tailKnot, positions map[tailKnot]bool) (err error) {
-	for s.Scan() {
-		head.traction, err = loadTractionFromCall(s.Text())
-		if err != nil {
-			return err
-		}
-		moveAll(&head, &tail, positions)
-	}
-	for tail.hasTraction(head) {
-		moveAll(&head, &tail, positions)
-	}
-	return nil
-}
-
-func moveAll(head *headKnot, tail *tailKnot, positions map[tailKnot]bool) {
-	head.move()
-	tail.follow(head)
-	positions[*tail] = true
-	if head.hasTraction() {
-		moveAll(head, tail, positions)
-	}
-}
-
-func (t traction) hasTraction() bool {
-	return t.sumUp() > 0
 }
 
 func r9b() {
@@ -158,5 +134,80 @@ func r9b() {
 	if err != nil {
 		log.Panic(err)
 	}
+	positions := make(map[tailKnot]bool)
+	head := headKnot{}
+	tails := make([]tailKnot, 9)
+	for i := range tails {
+		tails[i] = tailKnot{knot{x: 0, y: 0}}
+	}
+	err = scanAndMoveAll(s, head, tails, positions, false)
+	if err != nil {
+		panic(err)
+	}
+	println(len(positions))
+}
 
+func scanAndMoveAll(s *LineScanner, head headKnot, tails []tailKnot, positions map[tailKnot]bool, debug bool) (err error) {
+	for s.Scan() {
+		head.traction, err = loadTractionFromCall(s.Text())
+		if err != nil {
+			return err
+		}
+		moveAll(&head, tails, positions)
+		if debug {
+			drawField(&head, tails)
+		}
+	}
+	moveAll(&head, tails, positions)
+	if debug {
+		drawField(&head, tails)
+	}
+	return nil
+}
+
+func moveAll(head *headKnot, tails []tailKnot, positions map[tailKnot]bool) {
+	head.move()
+	tails[0].follow(&head.knot)
+	for i := range tails {
+		if i == 0 {
+			continue
+		}
+		tails[i].follow(&tails[i-1].knot)
+	}
+	positions[tails[len(tails)-1]] = true
+	if head.hasTraction() {
+		moveAll(head, tails, positions)
+	}
+}
+
+func drawField(head *headKnot, tails []tailKnot) {
+	var field [21][27]string
+	for y := range field {
+		for x := range field[y] {
+			field[y][x] = "."
+		}
+	}
+	field[15][11] = "s"
+
+	for i := len(tails) - 1; i >= 0; i-- {
+		k := tails[i]
+		field[k.y+15][k.x+11] = fmt.Sprint(i + 1)
+	}
+	field[head.y+15][head.x+11] = "H"
+	printField(field)
+}
+
+func printField(fields [21][27]string) {
+	for y := range fields {
+		for x := range fields[y] {
+			fmt.Printf("%v", fields[y][x])
+		}
+		fmt.Println()
+	}
+	fmt.Println()
+
+}
+
+func (t traction) hasTraction() bool {
+	return t.sumUp() > 0
 }
